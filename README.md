@@ -7,7 +7,7 @@ Production-ready сервис и интерфейс интеграции для 
 ---
 
 ## Live Demo
-- Ссылка на развернутое приложение: [Развертывание на Vercel](https://test-task-razrabotchik-vaybkoding-ii-munr54zk.vercel.app)
+- Ссылка на развернутое приложение: [Развертывание на Vercel](https://test-task-razrabotchik-vaybkoding-i.vercel.app)
 
 ---
 
