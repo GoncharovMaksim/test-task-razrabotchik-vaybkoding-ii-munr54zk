@@ -1,120 +1,140 @@
-# О-комплекс: ИИ-Ассистент менеджера AmoCRM
+I have initiated the test suite and type check validation, and will report back as soon as the execution completes.
+I have initiated the test suite and type check validation, and will report back as soon as the execution completes.
+I have initiated the production build (`npm run build`) and will verify that the compilation finishes cleanly.
+Production build is compiling, waiting for completion notification.
+I have initiated pushing the commit to origin main and will confirm upon completion.
+I have initiated the Vercel production deployment command and will wait for completion notification.
+Waiting for Vercel deployment to finish.
+# Проект: AmoCRM AI Copilot для команды «О-комплекс»
 
-Production-ready сервис и интерфейс интеграции для AmoCRM на **TypeScript**, разработанный специально по ТЗ компании **"О-комплекс"**.
-
-Сервис принимает обращение клиента в диалоговом окне сделки, сопоставляет его со структурированной базой регламентов и цен компании, после чего возвращает два блока:
-1. **Вежливый ответ клиенту** — выверенное обращение с опорой на реальные регламенты и прайс-лист "О-комплекс", без галлюцинаций, с релевантным Call to Action.
-2. **Подсказку по допродажам для менеджера** — выделение триггера боли клиента, ценностное обоснование, расчет потенциала прироста чека и готовая реплика-пивот для менеджера.
+Полноценный production-ready сервис и интерфейс интеграции для AmoCRM на базе **TypeScript** (Strict Mode, no `any`), решающий задачу обработки клиентских обращений в диалоговом окне сделки с генерацией:
+1. **Вежливого и экспертного ответа клиенту** на основе базы знаний регламентов «О-комплекс».
+2. **Интеллектуальной подсказки по допродажам (Upsell/Cross-sell) для менеджера** со скриптом пивота, обоснованием боли и расчетным приростом чека.
 
 ---
 
-### Ссылки на проект:
+## 1. Ссылки на проект и Live Demo
+
 - **Live Demo (Vercel)**: [https://test-task-razrabotchik-vaybkoding-i.vercel.app](https://test-task-razrabotchik-vaybkoding-i.vercel.app)
 - **GitHub Репозиторий**: [https://github.com/GoncharovMaksim/test-task-razrabotchik-vaybkoding-ii-munr54zk](https://github.com/GoncharovMaksim/test-task-razrabotchik-vaybkoding-ii-munr54zk)
-- **Логи Вайбкодинга & AI-транскрипты**: [`ai-transcripts/01-vibe-coding-process-and-architecture.md`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/ai-transcripts/01-vibe-coding-process-and-architecture.md)
+- **AI-транскрипты и журнал решений**: [`ai-transcripts/`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/ai-transcripts/)
 
 ---
 
-## 1. Архитектура и ключевые модули
+## 2. Архитектура и ключевые компоненты
 
 ```
-┌────────────────────────────────────────────────────────┐
-│                   AmoCRM Dialogue Window               │
-│ (Чат со сделкой, контекст лида, быстрые сценарии, ввод)│
-└───────────────────────────┬────────────────────────────┘
-                            │ POST /api/assist
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│                   Next.js App Router                   │
-│   (Zod Validation, Error Isolation, Token Masking)     │
-└──────────────┬────────────────────────────┬────────────┘
-               │                            │
-               ▼                            ▼
-┌───────────────────────────┐  ┌─────────────────────────┐
-│   KnowledgeBaseService    │  │   UpsellEngineService   │
-│(Поиск по базе регламентов,│  │(Матрица триггеров боли, │
-│  нормализация токенов 1C) │  │  допродажи и LTV boost) │
-└──────────────┬────────────┘  └────────────┬────────────┘
-               │                            │
-               └─────────────┬──────────────┘
-                             ▼
-              ┌─────────────────────────────┐
-              │    AiAssistantService       │
-              │  (Multi-Provider Failover)  │
-              └──────────────┬──────────────┘
-                             │
-     ┌───────────────────────┼───────────────────────┐
-     ▼                       ▼                       ▼
-┌──────────────┐      ┌──────────────┐      ┌─────────────────┐
-│   Groq API   │      │  Gemini API  │      │  Deterministic  │
-│ (Qwen 3.8 /  │      │ (2.5 Flash   │      │   Rule Engine   │
-│  LPU 80ms)   │      │  Fallover)   │      │  (Zero-Downtime)│
-└──────────────┘      └──────────────┘      └─────────────────┘
+                 ┌──────────────────────────────────────────────┐
+                 │          AmoCRM Deal & Chat UI               │
+                 │   (Симуляция рабочего места менеджера)       │
+                 └──────────────────────┬───────────────────────┘
+                                        │
+                         [POST /api/assist] / Webhook
+                                        │
+                                        ▼
+                 ┌──────────────────────────────────────────────┐
+                 │            Knowledge Base Engine             │
+                 │   - Поиск по токенам и тегам (1C / 1С)       │
+                 │   - Нормализация и расчет релевантности      │
+                 └──────────────────────┬───────────────────────┘
+                                        │
+                                        ▼
+                 ┌──────────────────────────────────────────────┐
+                 │             Upsell Rules Matrix              │
+                 │   - Детекция триггеров болей клиента         │
+                 │   - Комплементарные услуги и скрипты пивота  │
+                 └──────────────────────┬───────────────────────┘
+                                        │
+                                        ▼
+                 ┌──────────────────────────────────────────────┐
+                 │       AiAssistantService (Dispatcher)        │
+                 │   - Failover цепочка: Groq -> Gemini -> Rule │
+                 └──────────────┬──────────────┬────────────────┘
+                                │              │
+            ┌───────────────────┘              └──────────────────┐
+            ▼                                                     ▼
+┌───────────────────────┐                             ┌───────────────────────┐
+│     Groq Provider     │ (Fast inference LPU)        │    Gemini Provider    │
+│  (qwen/qwen3.8-27b)   │                             │  (gemini-2.5-flash)   │
+└───────────────────────┘                             └───────────────────────┘
+            │                                                     │
+            └─────────────────────────┬───────────────────────────┘
+                                      │ (Fallback при сбое сети)
+                                      ▼
+                        ┌───────────────────────────┐
+                        │ Deterministic Rule Engine │
+                        │  (100% аптайм без сбоев)  │
+                        └───────────────────────────┘
 ```
 
-1. **Frontend / Рабочее место менеджера**:
-   - Полноценная симуляция карточки сделки и диалогового окна AmoCRM (ООО «СеверТрейд», воронка, бюджет, теги, переписка).
-   - Предустановленные типовые сценарии обращений («Интеграция 1С и остатки склада», «Потеря ночных заявок / AI-квалификатор», «Базовое внедрение AmoCRM», «Телефония и записи звонков»).
-   - Интерактивный виджет Copilot с копированием в 1 клик, вставкой в поле ввода менеджера и переключением AI-провайдеров.
-2. **База знаний ([`knowledge-base.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/lib/kb/knowledge-base.ts))**:
-   - Точные регламенты, сроки и стоимость услуг "О-комплекс" (внедрение AmoCRM от 45 000 ₽, интеграция 1С от 60 000 ₽, AI-боты от 35 000 ₽, телефония от 25 000 ₽, кастомные виджеты от 30 000 ₽).
-   - Алгоритм ранжирования с нормализацией токенов (поддержка кириллицы/латиницы 1С/1C, учет весов тегов и заголовков).
-3. **Матрица допродаж ([`upsell-rules.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/lib/kb/upsell-rules.ts))**:
-   - Выявление скрытых болей клиента и подбор комплементарного продукта с расчетом LTV и готовой фразой-пивотом.
-4. **Отказоустойчивый диспетчер ([`ai-service.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/lib/ai/ai-service.ts))**:
-   - Основной инференс: **Groq API** (`qwen/qwen3.8-27b`) со сверхбыстрым ответом.
-   - Резервный провайдер: **Google Gemini API** (`gemini-2.5-flash`).
-   - Автономный **Deterministic Rule Engine**: локальный алгоритмический движок, гарантирующий 100% аптайм и моментальный ответ даже при отказе внешних LLM API.
-5. **AmoCRM Webhook Receiver ([`route.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/app/api/amocrm/webhook/route.ts))**:
-   - Прием стандартных вебхуков от Salesbot / Digital Pipeline AmoCRM, фильтрация исходящих сообщений для предотвращения зацикливания.
+### Основные модули системы:
+1. **Frontend / Рабочее место менеджера AmoCRM** ([`page.tsx`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/app/page.tsx)):
+   - Реалистичная панель AmoCRM в строгой цветовой гамме Dark/Slate: карточка клиента («СеверТрейд»), этап воронки, бюджет сделки, история переписки.
+   - 4 типовых сценария в 1 клик: «Интеграция 1С и остатки», «Потеря ночных заявок / AI-бот», «Базовое внедрение AmoCRM», «Телефония и записи звонков».
+   - Копирование ответа в буфер и вставка в поле ввода менеджера.
+   - Возможность переключения AI-провайдера в реальном времени (`Auto`, `Groq`, `Gemini`, `Deterministic Engine`).
+
+2. **База знаний регламентов компании** ([`knowledge-base.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/lib/kb/knowledge-base.ts)):
+   - Точные тарифы и сроки услуг «О-комплекс» (внедрение AmoCRM от 45 000 ₽, 1С от 60 000 ₽, AI-квалификаторы от 35 000 ₽, телефония от 25 000 ₽, кастомные виджеты от 30 000 ₽).
+   - Токенизация с поддержкой смешанной кириллицы/латиницы («1С» / «1C»).
+
+3. **Матрица допродаж (Upsell Matrix)** ([`upsell-rules.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/lib/kb/upsell-rules.ts)):
+   - Анализ скрытых потребностей и автоматическое предложение комплементарного продукта (например, при запросе 1С — модуль автовыставления счетов и контроля дебиторки +60 000 ₽; при внедрении AmoCRM — телефония +25 000 ₽).
+
+4. **Мульти-провайдерный AI-диспетчер** ([`ai-service.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/lib/ai/ai-service.ts)):
+   - **Groq LPU**: модель `qwen/qwen3.8-27b` для минимального времени ответа (1–2 сек).
+   - **Google Gemini**: модель `gemini-2.5-flash` как резервный контур.
+   - **Deterministic Fallback Engine**: локальный алгоритмический движок, гарантирующий отдачу структурированного ответа даже при полном отсутствии интернета или исчерпании лимитов.
+
+5. **API & Интеграция AmoCRM**:
+   - `POST /api/assist` — генерация блоков с валидацией схем через Zod ([`validation.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/lib/types/validation.ts)).
+   - `POST /api/amocrm/webhook` — обработчик событий Salesbot/Digital Pipeline AmoCRM с фильтрацией исходящих сообщений для предотвращения зацикливания.
+   - `GET /api/health` — статус здоровья сервиса и подключенных провайдеров.
+   - `GET /api/kb` — быстрый поиск по базе знаний.
 
 ---
 
-## 2. Результаты тестирования и сборки
+## 3. Результаты тестирования и сборки
 
-Все тесты и сборка запущены и успешно пройдены:
 - **Unit & Integration тесты**: **31 из 31 пройден успешно (100% Green)**
-  - `validation-schemas.test.ts` — строгая Zod-валидация контрактов входных и выходных данных.
-  - `knowledge-base.test.ts` — релевантность поиска, нормализация токенов (1С/1C).
-  - `upsell-rules.test.ts` — срабатывание триггеров и расчет confidence score.
-  - `deterministic-engine.test.ts` — проверка структуры ответов без сети.
-  - `prompt-builder.test.ts` — валидация сборки системных и пользовательских промптов.
-  - `assist-api.test.ts` — интеграционное тестирование `POST /api/assist` (200, 422, ошибки).
-  - `amocrm-webhook-api.test.ts` — тестирование `POST /api/amocrm/webhook` и защиты от циклов.
-  - `kb-api.test.ts` — тестирование поиска и выдачи базы знаний.
-  - `health-api.test.ts` — проверка телеметрии и статуса готовности сервисов.
-- **TypeScript strict check**: `npm run type-check` (`tsc --noEmit`) — **0 ошибок, strict mode**.
-- **Production Build**: `npm run build` — оптимизированный бандл Next.js собран без предупреждений.
-
----
-
-## 3. Запуск проекта
-
-### Вариант 1: Запуск в Docker Compose одной командой
-```bash
-docker compose up -d --build
-```
-Приложение станет доступно по адресу `http://localhost:3000`.
-
-### Вариант 2: Локальный запуск (Node.js 20+)
-```bash
-npm install
-npm test            # запуск набора из 31 теста
-npm run type-check  # проверка строгой типизации TypeScript
-npm run dev         # запуск локального сервера разработки (порт 3000)
-```
+  - Валидация Zod: корректные и некорректные payload'ы.
+  - Поиск по базе знаний: релевантность, нормализация символов, веса тегов.
+  - Матрица допродаж: триггеры болей, пороги уверенности.
+  - Детерминированный движок: валидность структуры обоих блоков без внешних API.
+  - Промпт-билдер: инъекция базы знаний и ограничений.
+  - API эндпоинты (`/api/assist`, `/api/amocrm/webhook`, `/api/health`, `/api/kb`).
+- **Строгая проверка типов**: `tsc --noEmit` — 0 ошибок.
+- **Production сборка**: `next build` — оптимизированный бандл собран без замечаний.
 
 ---
 
 ## 4. Сценарий видео-демонстрации (1–2 минуты)
 
-Готовый скрипт для записи видео с таймингом зафиксирован в [`ai-transcripts/01-vibe-coding-process-and-architecture.md`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/ai-transcripts/01-vibe-coding-process-and-architecture.md):
-1. **0:00 – 0:25**: Обзор рабочего места менеджера в интерфейсе AmoCRM (клиент ООО «СеверТрейд», этап воронки, история переписки).
-2. **0:25 – 0:55**: Отправка вопроса клиента «Сколько стоит интеграция AmoCRM с 1С для выгрузки остатков и счетов?»:
-   - **Блок 1**: Вежливый ответ клиенту со стоимостью от 60 000 ₽, сроками (7–10 дней) и уточняющим вопросом.
-   - **Блок 2**: Подсказка менеджеру по допродаже модуля «Автоматическое выставление счетов и контроль дебиторки» (+60 000 ₽ к чеку) с готовым скриптом пивота.
-3. **0:55 – 1:25**: Демонстрация других сценариев («Потеря заявок ночью», «Телефония»), модального окна базы знаний и регламентов.
-4. **1:25 – 1:50**: Рассказ об инструментах вайбкодинга: Groq (Qwen 3.8 LPU для низкой задержки), Gemini 2.5 Flash, Vitest Test-Driven синтез, Docker и деплой на Vercel Serverless.
+Подробный сценарий для записи видео с хронометражем зафиксирован в [`ai-transcripts/01-vibe-coding-process-and-architecture.md`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/ai-transcripts/01-vibe-coding-process-and-architecture.md):
+1. **0:00 – 0:25**: Обзор рабочего места менеджера в интерфейсе AmoCRM (карточка клиента ООО «СеверТрейд», воронка, диалоговое окно сделки).
+2. **0:25 – 0:55**: Отправка вопроса клиента «Сколько стоит интеграция с 1С?»:
+   - **Блок 1 (Ответ клиенту)**: Вежливый экспертный ответ с точной ценой от 60 000 ₽, сроком 7–10 дней и уточняющим вопросом по конфигурации (УТ/УНФ/ERP).
+   - **Блок 2 (Подсказка менеджеру)**: Рекомендация модуля автовыставления счетов (+60 000 ₽ к чеку) с готовым скриптом пивота.
+3. **0:55 – 1:25**: Демонстрация сценариев «Потеря заявок ночью» и «Телефония», переключение на резервный режим без потери качества.
+4. **1:25 – 1:50**: Рассказ об инструментах вайбкодинга: Next.js 14, Groq LPU (Qwen 3.8), Gemini 2.5 Flash, Vitest TDD, Docker Compose и Vercel Serverless.
+
+---
+
+## 5. Инструкция по локальному запуску
+
+### Запуск через Docker Compose (одной командой)
+```bash
+docker compose up -d --build
+```
+Интерфейс доступен по адресу: `http://localhost:3000`
+
+### Локальный запуск через Node.js (20+)
+```bash
+npm install
+npm test            # Запуск 31 теста
+npm run type-check  # Проверка типов TypeScript
+npm run dev         # Запуск dev-сервера
+```
 
 ---
 
