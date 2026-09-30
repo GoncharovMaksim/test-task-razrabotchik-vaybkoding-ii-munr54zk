@@ -1,0 +1,20 @@
+error: the connection to the agent was interrupted before the response finished: subscriber fell behind updates, stalled for 5s
+--- RETRY ATTEMPT LOG ---
+Проект полностью завершен строго по техническому заданию, протестирован, собран и синхронизирован с GitHub и Vercel.
+
+### Выполненные действия:
+1. **Тестирование (`npm test`)**:
+   - Запущен полный набор из 9 тестовых файлов (31 тест) — **100% зелёных тестов** (`31 passed`).
+   - Покрыты: Unit-тесты базы знаний, матрицы допродаж, Zod-валидации схем, детерминированного движка и генератора промптов; Integration-тесты эндпоинтов `/api/assist`, `/api/amocrm/webhook`, `/api/kb`, `/api/health`.
+
+2. **Сборка (`npm run build`)**:
+   - Успешно выполнена оптимизированная production-сборка Next.js 14 App Router без ошибок компиляции и типов TypeScript.
+
+3. **Репозиторий GitHub**:
+   - Репозиторий [test-task-razrabotchik-vaybkoding-ii-munr54zk](https://github.com/GoncharovMaksim/test-task-razrabotchik-vaybkoding-ii-munr54zk) обновлен, все последние изменения и актуальная ссылка на Live Demo закоммичены и запушены в ветку `main`.
+
+4. **Production Deployment (Vercel)**:
+   - Проект успешно развернут на Vercel Serverless.
+   - Эндпоинты `/api/health` и `/api/assist` протестированы cURL-запросами и отдают структурированные блоки (ответ клиенту + подсказка по допродажам).
+
+DEMO_URL: https://test-task-razrabotchik-vaybkoding-i.vercel.app
