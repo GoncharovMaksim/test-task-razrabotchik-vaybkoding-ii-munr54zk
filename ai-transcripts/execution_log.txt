@@ -1,20 +1,121 @@
-error: the connection to the agent was interrupted before the response finished: subscriber fell behind updates, stalled for 5s
---- RETRY ATTEMPT LOG ---
-Проект полностью завершен строго по техническому заданию, протестирован, собран и синхронизирован с GitHub и Vercel.
+# О-комплекс: ИИ-Ассистент менеджера AmoCRM
 
-### Выполненные действия:
-1. **Тестирование (`npm test`)**:
-   - Запущен полный набор из 9 тестовых файлов (31 тест) — **100% зелёных тестов** (`31 passed`).
-   - Покрыты: Unit-тесты базы знаний, матрицы допродаж, Zod-валидации схем, детерминированного движка и генератора промптов; Integration-тесты эндпоинтов `/api/assist`, `/api/amocrm/webhook`, `/api/kb`, `/api/health`.
+Production-ready сервис и интерфейс интеграции для AmoCRM на **TypeScript**, разработанный специально по ТЗ компании **"О-комплекс"**.
 
-2. **Сборка (`npm run build`)**:
-   - Успешно выполнена оптимизированная production-сборка Next.js 14 App Router без ошибок компиляции и типов TypeScript.
+Сервис принимает обращение клиента в диалоговом окне сделки, сопоставляет его со структурированной базой регламентов и цен компании, после чего возвращает два блока:
+1. **Вежливый ответ клиенту** — выверенное обращение с опорой на реальные регламенты и прайс-лист "О-комплекс", без галлюцинаций, с релевантным Call to Action.
+2. **Подсказку по допродажам для менеджера** — выделение триггера боли клиента, ценностное обоснование, расчет потенциала прироста чека и готовая реплика-пивот для менеджера.
 
-3. **Репозиторий GitHub**:
-   - Репозиторий [test-task-razrabotchik-vaybkoding-ii-munr54zk](https://github.com/GoncharovMaksim/test-task-razrabotchik-vaybkoding-ii-munr54zk) обновлен, все последние изменения и актуальная ссылка на Live Demo закоммичены и запушены в ветку `main`.
+---
 
-4. **Production Deployment (Vercel)**:
-   - Проект успешно развернут на Vercel Serverless.
-   - Эндпоинты `/api/health` и `/api/assist` протестированы cURL-запросами и отдают структурированные блоки (ответ клиенту + подсказка по допродажам).
+### Ссылки на проект:
+- **Live Demo (Vercel)**: [https://test-task-razrabotchik-vaybkoding-i.vercel.app](https://test-task-razrabotchik-vaybkoding-i.vercel.app)
+- **GitHub Репозиторий**: [https://github.com/GoncharovMaksim/test-task-razrabotchik-vaybkoding-ii-munr54zk](https://github.com/GoncharovMaksim/test-task-razrabotchik-vaybkoding-ii-munr54zk)
+- **Логи Вайбкодинга & AI-транскрипты**: [`ai-transcripts/01-vibe-coding-process-and-architecture.md`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/ai-transcripts/01-vibe-coding-process-and-architecture.md)
+
+---
+
+## 1. Архитектура и ключевые модули
+
+```
+┌────────────────────────────────────────────────────────┐
+│                   AmoCRM Dialogue Window               │
+│ (Чат со сделкой, контекст лида, быстрые сценарии, ввод)│
+└───────────────────────────┬────────────────────────────┘
+                            │ POST /api/assist
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│                   Next.js App Router                   │
+│   (Zod Validation, Error Isolation, Token Masking)     │
+└──────────────┬────────────────────────────┬────────────┘
+               │                            │
+               ▼                            ▼
+┌───────────────────────────┐  ┌─────────────────────────┐
+│   KnowledgeBaseService    │  │   UpsellEngineService   │
+│(Поиск по базе регламентов,│  │(Матрица триггеров боли, │
+│  нормализация токенов 1C) │  │  допродажи и LTV boost) │
+└──────────────┬────────────┘  └────────────┬────────────┘
+               │                            │
+               └─────────────┬──────────────┘
+                             ▼
+              ┌─────────────────────────────┐
+              │    AiAssistantService       │
+              │  (Multi-Provider Failover)  │
+              └──────────────┬──────────────┘
+                             │
+     ┌───────────────────────┼───────────────────────┐
+     ▼                       ▼                       ▼
+┌──────────────┐      ┌──────────────┐      ┌─────────────────┐
+│   Groq API   │      │  Gemini API  │      │  Deterministic  │
+│ (Qwen 3.8 /  │      │ (2.5 Flash   │      │   Rule Engine   │
+│  LPU 80ms)   │      │  Fallover)   │      │  (Zero-Downtime)│
+└──────────────┘      └──────────────┘      └─────────────────┘
+```
+
+1. **Frontend / Рабочее место менеджера**:
+   - Полноценная симуляция карточки сделки и диалогового окна AmoCRM (ООО «СеверТрейд», воронка, бюджет, теги, переписка).
+   - Предустановленные типовые сценарии обращений («Интеграция 1С и остатки склада», «Потеря ночных заявок / AI-квалификатор», «Базовое внедрение AmoCRM», «Телефония и записи звонков»).
+   - Интерактивный виджет Copilot с копированием в 1 клик, вставкой в поле ввода менеджера и переключением AI-провайдеров.
+2. **База знаний ([`knowledge-base.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/lib/kb/knowledge-base.ts))**:
+   - Точные регламенты, сроки и стоимость услуг "О-комплекс" (внедрение AmoCRM от 45 000 ₽, интеграция 1С от 60 000 ₽, AI-боты от 35 000 ₽, телефония от 25 000 ₽, кастомные виджеты от 30 000 ₽).
+   - Алгоритм ранжирования с нормализацией токенов (поддержка кириллицы/латиницы 1С/1C, учет весов тегов и заголовков).
+3. **Матрица допродаж ([`upsell-rules.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/lib/kb/upsell-rules.ts))**:
+   - Выявление скрытых болей клиента и подбор комплементарного продукта с расчетом LTV и готовой фразой-пивотом.
+4. **Отказоустойчивый диспетчер ([`ai-service.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/lib/ai/ai-service.ts))**:
+   - Основной инференс: **Groq API** (`qwen/qwen3.8-27b`) со сверхбыстрым ответом.
+   - Резервный провайдер: **Google Gemini API** (`gemini-2.5-flash`).
+   - Автономный **Deterministic Rule Engine**: локальный алгоритмический движок, гарантирующий 100% аптайм и моментальный ответ даже при отказе внешних LLM API.
+5. **AmoCRM Webhook Receiver ([`route.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/app/api/amocrm/webhook/route.ts))**:
+   - Прием стандартных вебхуков от Salesbot / Digital Pipeline AmoCRM, фильтрация исходящих сообщений для предотвращения зацикливания.
+
+---
+
+## 2. Результаты тестирования и сборки
+
+Все тесты и сборка запущены и успешно пройдены:
+- **Unit & Integration тесты**: **31 из 31 пройден успешно (100% Green)**
+  - `validation-schemas.test.ts` — строгая Zod-валидация контрактов входных и выходных данных.
+  - `knowledge-base.test.ts` — релевантность поиска, нормализация токенов (1С/1C).
+  - `upsell-rules.test.ts` — срабатывание триггеров и расчет confidence score.
+  - `deterministic-engine.test.ts` — проверка структуры ответов без сети.
+  - `prompt-builder.test.ts` — валидация сборки системных и пользовательских промптов.
+  - `assist-api.test.ts` — интеграционное тестирование `POST /api/assist` (200, 422, ошибки).
+  - `amocrm-webhook-api.test.ts` — тестирование `POST /api/amocrm/webhook` и защиты от циклов.
+  - `kb-api.test.ts` — тестирование поиска и выдачи базы знаний.
+  - `health-api.test.ts` — проверка телеметрии и статуса готовности сервисов.
+- **TypeScript strict check**: `npm run type-check` (`tsc --noEmit`) — **0 ошибок, strict mode**.
+- **Production Build**: `npm run build` — оптимизированный бандл Next.js собран без предупреждений.
+
+---
+
+## 3. Запуск проекта
+
+### Вариант 1: Запуск в Docker Compose одной командой
+```bash
+docker compose up -d --build
+```
+Приложение станет доступно по адресу `http://localhost:3000`.
+
+### Вариант 2: Локальный запуск (Node.js 20+)
+```bash
+npm install
+npm test            # запуск набора из 31 теста
+npm run type-check  # проверка строгой типизации TypeScript
+npm run dev         # запуск локального сервера разработки (порт 3000)
+```
+
+---
+
+## 4. Сценарий видео-демонстрации (1–2 минуты)
+
+Готовый скрипт для записи видео с таймингом зафиксирован в [`ai-transcripts/01-vibe-coding-process-and-architecture.md`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/ai-transcripts/01-vibe-coding-process-and-architecture.md):
+1. **0:00 – 0:25**: Обзор рабочего места менеджера в интерфейсе AmoCRM (клиент ООО «СеверТрейд», этап воронки, история переписки).
+2. **0:25 – 0:55**: Отправка вопроса клиента «Сколько стоит интеграция AmoCRM с 1С для выгрузки остатков и счетов?»:
+   - **Блок 1**: Вежливый ответ клиенту со стоимостью от 60 000 ₽, сроками (7–10 дней) и уточняющим вопросом.
+   - **Блок 2**: Подсказка менеджеру по допродаже модуля «Автоматическое выставление счетов и контроль дебиторки» (+60 000 ₽ к чеку) с готовым скриптом пивота.
+3. **0:55 – 1:25**: Демонстрация других сценариев («Потеря заявок ночью», «Телефония»), модального окна базы знаний и регламентов.
+4. **1:25 – 1:50**: Рассказ об инструментах вайбкодинга: Groq (Qwen 3.8 LPU для низкой задержки), Gemini 2.5 Flash, Vitest Test-Driven синтез, Docker и деплой на Vercel Serverless.
+
+---
 
 DEMO_URL: https://test-task-razrabotchik-vaybkoding-i.vercel.app
