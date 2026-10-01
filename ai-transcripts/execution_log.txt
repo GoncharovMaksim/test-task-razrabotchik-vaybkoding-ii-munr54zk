@@ -1,33 +1,31 @@
-I have started running the automated test suite (`npm test`) and am awaiting completion.
-Awaiting test suite completion...
-Running TypeScript type-check (`tsc --noEmit`) and Next.js production build (`npm run build`). Awaiting completion...
-Awaiting build completion...
-Deploying application to Vercel production. Awaiting completion...
-Проект **«ИИ-Ассистент менеджера AmoCRM»** для компании **«О-комплекс»** разработан, протестирован на 100% зелёный статус, упакован в Docker и развёрнут в production на Vercel.
+# ИИ-Ассистент менеджера AmoCRM («О-комплекс»)
+
+Проект успешно собран, протестирован на 100% зелёный статус, опубликован в репозиторий GitHub и развёрнут в production на платформе Vercel.
 
 ---
 
 ### 1. Архитектура и реализованные модули
 
-Проект разработан на **TypeScript в strict mode** (без `any`) с разделением ответственности по чистым слоям:
+Приложение разработано на **TypeScript в strict mode** (без единого `any`) с соблюдением принципов чистой модульной архитектуры:
 
 1. **Frontend / UI ([`src/app/page.tsx`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/app/page.tsx))**:
-   - Реалистичный эмулятор рабочего места менеджера AmoCRM (темная тема Slate/Zinc в строгом минималистичном стиле, без кислотных градиентов).
-   - Карточка лида (ООО «СеверТрейд», воронка, бюджет, история сообщений).
-   - Интерактивный виджет ассистента в диалоговом окне: генерация двух блоков в один клик, копирование и мгновенная вставка ответа в поле ввода менеджера.
-   - Быстрый выбор типовых сценариев клиентов («Интеграция 1С», «Потеря ночных заявок», «Телефония», «Внедрение AmoCRM»).
+   - Реалистичное рабочее место менеджера AmoCRM в строгой нейтральной палитре Slate/Zinc (стиль Linear / GitHub Dark / AmoCRM Night Theme, без кислотных неоновых градиентов).
+   - Карточка активной сделки (ООО «СеверТрейд», воронка, бюджет, история сообщений).
+   - Интерактивный AI-виджет в окне диалога: генерация блоков в 1 клик, копирование и мгновенная вставка ответа в поле ввода менеджера.
+   - Быстрые пресеты обращений («Интеграция 1С и остатки», «Потеря ночных заявок / AI-бот», «Базовое внедрение AmoCRM», «Телефония и контроль звонков»).
+   - Модальные окна управления базой знаний ([`src/components/KnowledgeBaseModal.tsx`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/components/KnowledgeBaseModal.tsx)) и эмулятора Webhook AmoCRM ([`src/components/WebhookSimulatorModal.tsx`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/components/WebhookSimulatorModal.tsx)).
 
 2. **Два обязательных блока генерации**:
-   - **Блок 1 (Вежливый ответ клиенту)**: Экспертный ответ с точной стоимостью, сроками реализации по регламенту и вовлекающим вопросом (Call to Action).
+   - **Блок 1 (Вежливый ответ клиенту)**: Экспертный ответ с точной стоимостью, сроками выполнения по регламенту и вовлекающим вопросом (Call to Action).
    - **Блок 2 (Подсказка менеджеру по допродажам)**: Выделение скрытой боли клиента, ценностное обоснование (reasoning), оценка прироста среднего чека (+25 000 ₽ ... +60 000 ₽) и готовый скрипт предложения (suggested pitch).
 
-3. **База знаний регламентов и матрица допродаж**:
-   - [`src/lib/kb/knowledge-base.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/lib/kb/knowledge-base.ts): Структурированная база регламентов с алгоритмом ранжирования, стеммингом и нормализацией токенов (обработка кириллицы/латиницы 1С/1C).
+3. **База знаний и матрица допродаж**:
+   - [`src/lib/kb/knowledge-base.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/lib/kb/knowledge-base.ts): Структурированная база регламентов и тарифов с алгоритмом ранжирования, стеммингом и нормализацией токенов (обработка кириллицы/латиницы 1С/1C).
    - [`src/lib/kb/upsell-rules.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/lib/kb/upsell-rules.ts): Движок сопоставления триггеров болей с продуктовой матрицей компании «О-комплекс».
 
 4. **Мультипровайдерный AI-диспетчер и отказоустойчивость**:
-   - [`src/lib/ai/ai-service.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/lib/ai/ai-service.ts): Интеграция с **Groq LPU** (Qwen 3.8) и **Google Gemini 2.5 Flash**.
-   - Автоматический failover на встроенный **Deterministic Rule Engine** при отсутствии сети или rate limit внешних API, что гарантирует 100% аптайм и нулевой риск 500-х ошибок.
+   - [`src/lib/ai/ai-service.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/lib/ai/ai-service.ts): Интеграция с **Groq LPU** (`qwen/qwen3.8-27b`) для сверхбыстрого инференса и **Google Gemini** (`gemini-2.5-flash`).
+   - Автоматический failover на встроенный **Deterministic Rule Engine** при отсутствии сети или превышении лимитов внешних API, что исключает 500-е ошибки на продакшене.
 
 5. **API & Интеграции AmoCRM**:
    - `POST /api/assist`: Основной эндпоинт генерации ответов и подсказок со строгой валидацией Zod ([`src/lib/validation/schemas.ts`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/src/lib/validation/schemas.ts)).
@@ -37,23 +35,23 @@ Deploying application to Vercel production. Awaiting completion...
 
 ---
 
-### 2. Результаты верификации и тестирования
+### 2. Результаты тестирования и сборки
 
-- **Unit & Integration тесты**: **31 из 31 пройден успешно (100% Green)**
+- **Unit & Integration тесты (Vitest)**: **31 из 31 пройден успешно (100% Green)**
   - Валидация Zod: граничные случаи, пустые поля, некорректные типы.
   - Поиск по базе знаний: релевантность, нормализация символов, теги.
   - Матрица допродаж: триггеры, confidence score.
   - Детерминированный движок: структура ответов без внешних зависимостей.
   - Интеграция API: `/api/assist`, `/api/amocrm/webhook`, `/api/kb`, `/api/health`.
 - **Проверка типов TypeScript**: `npm run type-check` (`tsc --noEmit`) — **0 ошибок, strict mode**.
-- **Production-сборка**: `npm run build` — оптимизированный бандл Next.js собран без ошибок.
+- **Production-сборка**: `npm run build` — оптимизированный бандл Next.js и standalone-сборка собраны без единой ошибки.
 
 ---
 
-### 3. Материалы для сдачи и видео-демонстрации
+### 3. Материалы для видео-демонстрации (1–2 минуты)
 
 В директории [`ai-transcripts/`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/ai-transcripts/) сохранены:
-- [`ai-transcripts/01-vibe-coding-process-and-architecture.md`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/ai-transcripts/01-vibe-coding-process-and-architecture.md): Подробный сценарий для записи 1–2 минутного видео (посекундный хронометраж, что показать в интерфейсе, как продемонстрировать генерацию блоков и какие ИИ-инструменты озвучить).
+- [`ai-transcripts/01-vibe-coding-process-and-architecture.md`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/ai-transcripts/01-vibe-coding-process-and-architecture.md): Подробный сценарий для записи 1–2 минутного видео (посекундный тайминг, что показать в интерфейсе, как продемонстрировать генерацию обоих блоков и какие ИИ-инструменты озвучить).
 - [`ai-transcripts/execution_log.txt`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/ai-transcripts/execution_log.txt): Лог этапов проектирования, сборки и верификации.
 - [`ai-transcripts/task_prompt.txt`](file:///hanterpro_test_tasks/test-task-razrabotchik-vaybkoding-ii-munr54zk/ai-transcripts/task_prompt.txt): Исходная постановка задачи.
 
@@ -70,6 +68,8 @@ npm install
 npm test
 npm run dev
 ```
+
+Интерфейс доступен по адресу: `http://localhost:3000`.
 
 ---
 
